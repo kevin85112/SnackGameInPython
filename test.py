@@ -32,12 +32,8 @@ root.geometry("600x600")
 snake_game = SnakeGame()
 
 text_box = tk.Text(root, height=snake_game.height(), width=snake_game.width(), cursor="arrow",
-                   highlightthickness=0, borderwidth=0, wrap="none")
-# , bg=root.cget("bg")
+                   highlightthickness=0, borderwidth=0, wrap="none", bg=root.cget("bg"))
 text_box.pack(fill="both", expand=True, padx=10, pady=10)
-
-# text_box.tag_configure("spacing", spacing1=0, spacing2=0, spacing3=0)
-# text_box.tag_add("spacing", "1.0", "end")
 
 text_box.bind("<Button-1>", disable_selection)
 text_box.bind("<B1-Motion>", disable_selection)
