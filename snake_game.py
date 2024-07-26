@@ -72,22 +72,22 @@ class SnakeGame:
     def register_end(self, listener: Callable[[], None]):
         self.__emitter.on(self.__event_end, listener)
 
-    def cell_size(self):
+    def cell_size(self) -> int:
         return self.__cell_size
 
-    def width(self):
+    def width(self) -> int:
         return self.__width
 
-    def height(self):
+    def height(self) -> int:
         return self.__height
 
-    def is_start(self):
+    def is_start(self) -> bool:
         return self.__is_start
 
-    def is_end(self):
+    def is_end(self) -> bool:
         return self.__is_end
 
-    def get_walls(self) -> set[Tuple[int, int]]:
+    def __get_walls(self) -> set[Tuple[int, int]]:
         result = set()
         for row in [0, self.__height - 1]:
             for column in range(self.__width):
@@ -98,7 +98,7 @@ class SnakeGame:
             result.add((self.__width - 1, row))
         return result
 
-    def get_bodys(self) -> List[Tuple[int, int]]:
+    def __get_bodys(self) -> List[Tuple[int, int]]:
         list = []
         pos = self.__current_pos
         for dir in self.__current_body:
@@ -113,7 +113,7 @@ class SnakeGame:
     def __create_snack(self):
         pos = self.__current_pos
         self.__raise_update(pos, Sign.SNACK_HEAD)
-        for pos in self.get_bodys():
+        for pos in self.__get_bodys():
             self.__raise_update(pos, Sign.SNACK_BODY)
 
     def __create_point(self):
@@ -122,7 +122,7 @@ class SnakeGame:
             for y in range(self.__height):
                 remain.add((x, y))
 
-        remain = remain - {self.__current_pos} - set(self.get_bodys()) - \
+        remain = remain - {self.__current_pos} - set(self.__get_bodys()) - \
             self.__current_walls - self.__current_points
 
         index = randint(0, len(remain) - 1)
@@ -138,7 +138,7 @@ class SnakeGame:
         self.__current_pos = newPos
 
     def __pop_snack(self):
-        body = self.get_bodys()
+        body = self.__get_bodys()
         self.__raise_update(body[len(body) - 1], Sign.NONE)
         self.__current_body.pop()
 
@@ -147,7 +147,7 @@ class SnakeGame:
         self.__current_body = []
         self.__current_points = set()
         self.__current_dir = Direction.RIGHT
-        self.__current_walls = self.get_walls()
+        self.__current_walls = self.__get_walls()
         self.__next_dir = Direction.RIGHT
         for _ in range(self.__snack_length - 1):
             self.__current_body.append(Direction.LEFT)
@@ -170,13 +170,15 @@ class SnakeGame:
             self.__current_points.remove(self.__current_pos)
             self.__create_point()
         elif (self.__current_pos in self.__current_walls
-              or self.__current_pos in self.get_bodys()):
+              or self.__current_pos in self.__get_bodys()):
             self.__raise_end()
         else:
             self.__pop_snack()
 
-    def send_dir(self, dir: Direction) -> None:
+    def send_dir(self, dir: Direction) -> bool:
         if (not self.__is_start or self.__is_end or not self.__enable_send_dir):
-            return
-        if (dir != SnakeGame.__reverse_dir(self.__current_dir)):
-            self.__next_dir = dir
+            return False
+        if (dir == SnakeGame.__reverse_dir(self.__current_dir)):
+            return False
+        self.__next_dir = dir
+        return True
